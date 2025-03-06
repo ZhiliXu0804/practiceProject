@@ -23,6 +23,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import BottomSheet from './BottomSheet';
 
 type SectionProps = PropsWithChildren<{
   title: string;
