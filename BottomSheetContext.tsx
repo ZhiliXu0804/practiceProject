@@ -24,13 +24,13 @@ export const BottomSheetProvider: React.FC<BottomSheetProviderProps> = ({
 }) => {
   const [canBottomSheetBeDismissed, setCanBottomSheetBeDismissed] =
     useState<boolean>(true);
-  const [bottomSheetHeight, setHeight] = useState<number>(0);
+  const [bottomSheetHeight, setHeight] = useState<number>(502);
 
   const isBottomSheetOpen = useSharedValue<boolean>(false);
   const [bottomSheetContent, setBottomSheetContent] =
     useState<ReactNode | null>(null);
 
-  const openBottomSheet = (content: ReactNode, canBeDismissed = true) => {
+  const openBottomSheet = (content?: ReactNode, canBeDismissed = true) => {
     setBottomSheetContent(content);
     setCanBottomSheetBeDismissed(canBeDismissed);
     isBottomSheetOpen.value = true;
@@ -39,11 +39,12 @@ export const BottomSheetProvider: React.FC<BottomSheetProviderProps> = ({
   const closeBottomSheet = () => {
     isBottomSheetOpen.value = false;
     setBottomSheetContent(null);
-    setHeight(0);
   };
+
   const setBottomSheetHeight = (height: number) => {
     setHeight(height);
   };
+
   return (
     <BottomSheetContext.Provider
       value={{

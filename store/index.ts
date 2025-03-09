@@ -2,9 +2,13 @@ import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface AppState {
   lastLoginTime: number;
+  tableNumber: string | null;
 }
 
-const initialState: AppState = { lastLoginTime: new Date().getTime()};
+const initialState: AppState = {
+  lastLoginTime: new Date().getTime(),
+  tableNumber: null
+};
 
 const appStateSlice = createSlice({
   name: 'chat',
@@ -16,6 +20,12 @@ const appStateSlice = createSlice({
     ) => {
       state.lastLoginTime = action.payload;
     },
+    setTableNumber: (
+      state: AppState,
+      action: PayloadAction<string>,
+    ) => {
+      state.tableNumber = action.payload;
+    },
   },
 });
 
@@ -25,6 +35,7 @@ const store = configureStore({
 
 export const {
   setLastLoginTime,
+  setTableNumber,
 } = appStateSlice.actions;
 
 export type RootState = ReturnType<typeof store.getState>;

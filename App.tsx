@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -19,24 +19,43 @@ import {
 import BottomSheet from './BottomSheet';
 import { BottomSheetProvider, useBottomSheet } from './BottomSheetContext';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
-import { Provider, useSelector } from 'react-redux';
-import store, { RootState } from './store';
+import { Provider, useDispatch } from 'react-redux';
+import store, { setTableNumber } from './store';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import DetailsScreen from './Screen/DetailsScreen';
 
-function HomeScreen(){
+const Stack = createNativeStackNavigator();
+
+function HomeScreen() {
   const isDarkMode = useColorScheme() === 'dark';
+  const dispatch = useDispatch();
+  const { openBottomSheet, isBottomSheetOpen, bottomSheetHeight } = useBottomSheet();
 
-  const lastLoginTime: number | undefined = useSelector(
-    (state: RootState) => state.lastLoginTime,
-  );
+  useEffect(() => {
+    const fetchTableNumber = async () => {
+      try {
+        const response = await fetch('https://us-central1-net-planetxr-buffettlunch.cloudfunctions.net/practiceProject');
+        const data = await response.json();
+        console.log('Fetched table number:', data.tableNumber);
+        dispatch(setTableNumber(data.tableNumber));
+        console.log('Opening bottom sheet...');
+        openBottomSheet(null);
+        console.log('Bottom sheet state:', { isOpen: isBottomSheetOpen.value, height: bottomSheetHeight });
+      } catch (error) {
+        console.error('Error fetching table number:', error);
+      }
+    };
+
+    fetchTableNumber();
+  }, [dispatch, openBottomSheet, isBottomSheetOpen, bottomSheetHeight]);
 
   return (
-    <React.Fragment>
+    <View style={styles.container}>
       <ScrollView style={styles.sectionContainer}>
         <Text style={styles.headerText}>
           LunchME
         </Text>
-        <Text> Last login time: {lastLoginTime}</Text>
         <Text
           style={[
             styles.sectionTitle,
@@ -64,7 +83,14 @@ function HomeScreen(){
           {"\n"}{"\n"}Figma: https://www.figma.com/design/t0KlHFgGtsQKpSGgsKjGhq/Coding-Exercise?node-id=0-1&t=BsGRLah0sKpG3BpE-1
         </Text>
       </ScrollView>
-    </React.Fragment>
+      <BottomSheet
+        isOpen={isBottomSheetOpen}
+        bottomSheetHeight={bottomSheetHeight}
+        canBeDismissed={true}
+      >
+        {null}
+      </BottomSheet>
+    </View>
   );
 }
 
@@ -82,9 +108,20 @@ function App(): React.JSX.Element {
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <GestureHandlerRootView>
+        <GestureHandlerRootView style={styles.rootContainer}>
           <BottomSheetProvider>
-            <HomeScreen />
+            <Stack.Navigator>
+              <Stack.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Details"
+                component={DetailsScreen}
+                options={{ title: 'Table Details' }}
+              />
+            </Stack.Navigator>
           </BottomSheetProvider>
         </GestureHandlerRootView>
       </NavigationContainer>
@@ -93,6 +130,10 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   headerText: {
     fontSize: 32,
     fontWeight: '700',
@@ -101,6 +142,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   sectionContainer: {
+    flex: 1,
     marginVertical: 32,
     paddingHorizontal: 24,
   },
@@ -116,6 +158,9 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  container: {
+    flex: 1,
   },
 });
 
